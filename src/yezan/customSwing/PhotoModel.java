@@ -1,6 +1,7 @@
 package yezan.customSwing;
 
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class PhotoModel implements ButtonModel 
@@ -22,16 +24,35 @@ public class PhotoModel implements ButtonModel
 	private Image image=null;
 	
 	private ArrayList<ChangeListener> changeListeners;
+	// keep references to all strokes location
+	private ArrayList<Point> strokes;
 	
 	public PhotoModel()
 	{
 		super();
 		changeListeners = new ArrayList<ChangeListener>();
+		strokes = new ArrayList<Point>();
+	}
+	
+	
+	public void addStroke(Point location) 
+	{
+		strokes.add(location);
+		fireStateChange();
 	}
 	
 	public boolean isFlipped()
 	{
 		return flipped;
+	}
+	
+	public void setFlipped(boolean value)
+	{
+		if ( flipped != value )
+		{
+			flipped = value;
+			fireStateChange();
+		}
 	}
 	
 	public void setAnnotation(String annotation)
@@ -50,9 +71,15 @@ public class PhotoModel implements ButtonModel
 	public Image getImage() {
 		return image;
 	}
+	
+	public ArrayList<Point> getStrokes()
+	{
+		return strokes;
+	}
 
 	public void setImage(Image image) {
 		this.image = image;
+		fireStateChange();
 	}
 	
 	public void setImage(String imgSource)
@@ -61,6 +88,8 @@ public class PhotoModel implements ButtonModel
 		{
 			image = ImageIO.read(new File(imgSource));
 			this.imgSource = imgSource;
+			// notify that image has been updated
+			fireStateChange();
 		} 
 		catch (IOException e) 
 		{
@@ -78,7 +107,10 @@ public class PhotoModel implements ButtonModel
 	
 	protected void fireStateChange()
 	{
-		
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener changeListener : changeListeners) {
+			changeListener.stateChanged(event);
+		}
 	}
 	
 	@Override
@@ -195,4 +227,6 @@ public class PhotoModel implements ButtonModel
 	public void removeItemListener(ItemListener l) {
 
 	}
+
+	
 }
