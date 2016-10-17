@@ -9,6 +9,8 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -17,9 +19,9 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.plaf.ComponentUI;
 
-public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionListener
+public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionListener, KeyListener
 {
-	float 	thumbnailScaleFactor=0.16f;
+	float 			thumbnailScaleFactor=0.16f;
 	int   			marginX=20;
 	int 			marginY=20;
 	int				strokeWidth=5;
@@ -42,27 +44,39 @@ public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionL
 	{
 		BasicPhotoComponent bpc = (BasicPhotoComponent) c;
 		Image image = bpc.getImage();
-		return image != null ? new Dimension((int) (image.getWidth(null)*thumbnailScaleFactor/*+marginX*2*/),
-				(int) (image.getHeight(null)*thumbnailScaleFactor/*+marginY*2*/)) : new Dimension(128, 96);
+		return image != null ? new Dimension((int) (image.getWidth(null)*thumbnailScaleFactor+marginX*2),
+				(int) (image.getHeight(null)*thumbnailScaleFactor+marginY*2)) : new Dimension(128+marginX*2, 96+marginY*2);
+	}
+	
+	public Dimension getThumbnailSize(JComponent c)
+	{
+		BasicPhotoComponent bpc = (BasicPhotoComponent) c;
+		Image image = bpc.getImage();
+		return image != null ? new Dimension((int) (image.getWidth(null)*thumbnailScaleFactor),
+				(int) (image.getHeight(null)*thumbnailScaleFactor)) : new Dimension(128, 96);
 	}
 	
 	public void installUI(JComponent c)
 	{
-		((BasicPhotoComponent) c).addMouseListener(this);
-		((BasicPhotoComponent) c).addMouseMotionListener(this);
+		BasicPhotoComponent bpc = ((BasicPhotoComponent) c);
+		bpc.addMouseListener(this);
+		bpc.addMouseMotionListener(this);
+		bpc.addKeyListener(this);
 	}
 	
 	public void uninstallUI(JComponent c)
 	{
-		((BasicPhotoComponent) c).removeMouseListener(this);
-		((BasicPhotoComponent) c).removeMouseMotionListener(this);
+		BasicPhotoComponent bpc = ((BasicPhotoComponent) c);
+		c.removeMouseListener(this);
+		c.removeMouseMotionListener(this);
+		c.removeKeyListener(this);
 	}
 	
 	
 	@Override
 	public void mouseClicked(MouseEvent e) 
 	{
-		BasicPhotoComponent bpc = (BasicPhotoComponent) e.getComponent();
+		BasicPhotoComponent bpc = (BasicPhotoComponent) e.getSource();
 		// case of double click
 		if ( e.getClickCount() == 2)
 		{
@@ -90,7 +104,7 @@ public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionL
 	@Override
 	public void mouseEntered(MouseEvent e) 
 	{
-		System.out.println("Mouse entered "+ ((BasicPhotoComponent) e.getSource()).getSize());
+		System.out.println("Mouse entered "+ ((BasicPhotoComponent) e.getSource()));
 		((BasicPhotoComponent) e.getSource()).onMouseEnter();
 	}
 
@@ -98,56 +112,16 @@ public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionL
 	public void mouseExited(MouseEvent e) 
 	{
 		((BasicPhotoComponent) e.getSource()).onMouseExit();
+		
 	}
 	
-	
-//	@Override
-//	public void paint(Graphics g, JComponent c)
-//	{
-//		super.paint(g, c);
-//		System.out.println("=== Begin Painting photoComponent ====");
-//		Graphics2D g2D = (Graphics2D) g; 		
-//		
-//		Dimension totalSize = getPreferredSize(c);
-//		// calculate thumbnail dimensions
-//		Dimension thumbnailSize = new Dimension(totalSize.width-marginX*2, totalSize.height-marginY*2);
-//
-//		System.out.println("Drawing Image container at "+c.getLocation()+"; Dimensions : "+totalSize);
-//		Rectangle imageContainer = new Rectangle(c.getLocation(), getPreferredSize(c));
-//		
-//		// Draw image container
-//		g2D.setPaint(new Color(189, 195, 199)); //rgb(236, 240, 241)
-//		g2D.fill(imageContainer);
-//		
-//		// calculate thumbnail or white rectangle location, in general it's the content to be drawn inside
-//		// the image container
-//		Point thumbnailLocation = new Point(imageContainer.getLocation().x + marginX,
-//				 imageContainer.getLocation().y + marginY);
-//		
-//		// if the photo is flipped then draw white background
-//		if ( ((BasicPhotoComponent) c).isFlipped() )
-//		{
-//			g2D.setPaint(Color.white);
-//			g2D.fill(new Rectangle(thumbnailLocation, thumbnailSize));
-//		}
-//		// else draw image
-//		else
-//		{
-//			g2D.drawImage(((BasicPhotoComponent) c).getImage(), thumbnailLocation.x, 
-//					   	  thumbnailLocation.y, 
-//					      thumbnailSize.width,
-//					      thumbnailSize.height,
-//					      null);
-//		}
-//		System.out.println("=== End Painting photoComponent ===");
-//	}
 	
 	@Override
 	public void paint(Graphics g, JComponent c)
 	{
 		super.paint(g, c);
 		System.out.println("=== Begin Painting photoComponent ====");
-		Graphics2D g2D = (Graphics2D) g; 		
+		Graphics2D g2D = (Graphics2D) g.create(); 		
 		
 		// size of the component
 		Dimension totalSize =  c.getSize();
@@ -172,14 +146,33 @@ public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionL
 		{
 			g2D.setPaint(Color.white);
 			g2D.fill(new Rectangle(thumbnailLocation, thumbnailSize));
-			// draw strokes ( if there are any )
-			ArrayList<Point> strokes = bpc.getStrokes();
+
 			g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2D.setPaint(Color.black);
+			// draw annotation ( if it exists )
+			Annotation annotation = bpc.getAnnotation();	
+			if ( annotation != null && annotation.getLocation() != null)
+			{
+				System.out.println("Draw string "+annotation.getText()+" at : ("+annotation.getLocation().x
+						+", "+annotation.getLocation().y+")");
+				g2D.drawString(annotation.getText(), annotation.getLocation().x, annotation.getLocation().y);
+				
+			}
+			//draw strokes ( if there are any )
+			ArrayList<Point> strokes = bpc.getStrokes();
 			g2D.setStroke(new BasicStroke(strokeWidth));
+			Point previousPoint = null;
 			for (Point stroke : strokes) 
 			{
-				g2D.drawLine(stroke.x, stroke.y, stroke.x, stroke.y);
+				if ( previousPoint == null )
+				{
+					g2D.drawLine(stroke.x, stroke.y, stroke.x, stroke.y);
+				}
+				else
+				{
+					g2D.drawLine(previousPoint.x, previousPoint.y, stroke.x, stroke.y);
+				}
+				previousPoint = stroke;
 			}
 		}
 		// else draw image
@@ -191,6 +184,7 @@ public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionL
 					      thumbnailSize.height,
 					      null);
 		}
+		g2D.dispose();
 		System.out.println("=== End Painting photoComponent ===");
 	}
 
@@ -203,6 +197,22 @@ public class BasicPhotoUI extends PhotoUI implements MouseListener, MouseMotionL
 	@Override
 	public void mouseMoved(MouseEvent e) {
 	
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		System.out.println("Key typed");
+		((BasicPhotoComponent) e.getSource()).onKeyType(e.getKeyChar());
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+
 	}
 	
 }

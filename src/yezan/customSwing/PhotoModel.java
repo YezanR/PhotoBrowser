@@ -14,18 +14,20 @@ import javax.swing.ButtonModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+
 public class PhotoModel implements ButtonModel 
 {
 	private static final long serialVersionUID = 1L;
 	
-	private boolean flipped=false;
-	private String annotation=null;
-	private String imgSource=null;
-	private Image image=null;
+	private boolean 		flipped=false;
+	private Annotation 		annotation=null;
+	private String 			imgSource=null;
+	private Image 			image=null;
 	
 	private ArrayList<ChangeListener> changeListeners;
 	// keep references to all strokes location
 	private ArrayList<Point> strokes;
+
 	
 	public PhotoModel()
 	{
@@ -55,9 +57,10 @@ public class PhotoModel implements ButtonModel
 		}
 	}
 	
-	public void setAnnotation(String annotation)
+	public void setAnnotation(Annotation annotation)
 	{
 		this.annotation = annotation;
+		fireStateChange();
 	}
 
 	@Override
@@ -70,6 +73,11 @@ public class PhotoModel implements ButtonModel
 
 	public Image getImage() {
 		return image;
+	}
+	
+	public Annotation getAnnotation()
+	{
+		return annotation;
 	}
 	
 	public ArrayList<Point> getStrokes()

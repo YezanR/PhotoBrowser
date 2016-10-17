@@ -1,9 +1,5 @@
 package yezan.customSwing;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -20,18 +16,18 @@ public class TestMain
 		w.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JPanel mainPanel = new JPanel();
-		//mainPanel.add(new JButton("diki"));
-		//mainPanel.add(new JButton("diki2"));
-		//mainPanel.add(new JButton("diki3"));
+		//mainPanel.add(new JButton("d"));
+		//mainPanel.add(new JButton("d2"));
+		//mainPanel.add(new JButton("d3"));
 		
 		BasicPhotoComponent bpc  = new BasicPhotoComponent();
-		BasicPhotoComponent bpc1 = new BasicPhotoComponent();
-		BasicPhotoComponent bpc2 = new BasicPhotoComponent();
-		BasicPhotoComponent bpc3 = new BasicPhotoComponent();
+		//BasicPhotoComponent bpc1 = new BasicPhotoComponent();
+		//BasicPhotoComponent bpc2 = new BasicPhotoComponent();
+		//BasicPhotoComponent bpc3 = new BasicPhotoComponent();
 		
 		mainPanel.add(bpc);
-		mainPanel.add(bpc1);
-		mainPanel.add(bpc2);
+		//mainPanel.add(bpc1);
+		//mainPanel.add(bpc2);
 		//mainPanel.add(bpc3);
 		
 		

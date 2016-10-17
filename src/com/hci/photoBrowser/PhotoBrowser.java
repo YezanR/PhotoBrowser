@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToggleButton;
 import javax.swing.UIManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import yezan.customSwing.*;
 
@@ -31,6 +32,7 @@ public class PhotoBrowser
 	private JPanel 			mainPanel;
 	private JPanel 			footer;
 	private JPanel 			toolbar;
+	private JPanel			contentPanel;
 	private JMenuBar		mainMenuBar;
 	private JMenu			fileMenu;
 	private JMenu			viewMenu;
@@ -48,7 +50,7 @@ public class PhotoBrowser
     private JToggleButton			schoolToggleBtn;
     private ButtonGroup				categoryGroup;
   
-    private final Dimension mainWindowSize = new Dimension(640, 480);
+    private final Dimension mainWindowSize = new Dimension(960, 720);
     private final Dimension mainWindowMaxSize = new Dimension(1000, 850);
     private final Dimension mainWindowMinSize = new Dimension(400, 250);
     private final Dimension toolbarSize = new Dimension(150, 450);
@@ -83,6 +85,7 @@ public class PhotoBrowser
 		mainPanel = new JPanel(new BorderLayout());
 		footer    = new JPanel(new FlowLayout());
 		toolbar	  = new JPanel(new FlowLayout());
+		contentPanel = new JPanel();
 		// Menu initialization
 		mainMenuBar = new JMenuBar();
 		
@@ -122,7 +125,6 @@ public class PhotoBrowser
 		categoryGroup.add(vacationToggleBtn);
 		categoryGroup.add(schoolToggleBtn);
 		
-		
 		toolbar.add(categoryLabel);
 		toolbar.add(familyToggleBtn);
 		toolbar.add(vacationToggleBtn);
@@ -130,6 +132,14 @@ public class PhotoBrowser
 		
 		toolbar.setPreferredSize(toolbarSize);
 		toolbar.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(189, 195, 199)));
+		
+		BasicPhotoComponent bpc  = new BasicPhotoComponent();
+		BasicPhotoComponent bpc1 = new BasicPhotoComponent();
+		BasicPhotoComponent bpc2 = new BasicPhotoComponent();
+		
+		contentPanel.add(bpc);
+		contentPanel.add(bpc1);
+		contentPanel.add(bpc2);
 		
 		// Status bar init
 		statusBar = new JLabel("Status bar");
@@ -139,6 +149,8 @@ public class PhotoBrowser
 		mainPanel.add(mainMenuBar, BorderLayout.NORTH);
 		mainPanel.add(footer, BorderLayout.SOUTH);
 		mainPanel.add(toolbar, BorderLayout.EAST);
+		mainPanel.add(contentPanel, BorderLayout.CENTER);
+		
 				
 		mainWindow.getContentPane().add(mainPanel);
 		mainWindow.setVisible(true);
@@ -154,8 +166,14 @@ public class PhotoBrowser
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JFileChooser fileChooser = new JFileChooser();
-				fileChooser.showOpenDialog(mainWindow);
-				
+				FileNameExtensionFilter filter = new FileNameExtensionFilter( "JPG & GIF Images", "jpg", "gif");
+				fileChooser.setFileFilter(filter);				
+				int returnVal = fileChooser.showOpenDialog(mainWindow);
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+					System.out.println("You chose file "+fileChooser.getSelectedFile().getPath());
+					BasicPhotoComponent bpc = new BasicPhotoComponent(fileChooser.getSelectedFile().getPath());
+					contentPanel.add(bpc);
+				}
 				updateStatusBar(importString);
 			}
 		});

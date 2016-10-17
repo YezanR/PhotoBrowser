@@ -15,13 +15,49 @@ public class BasicPhotoComponent extends JComponent implements ChangeListener
 {
 	private static final long serialVersionUID = 1L;
 
-	private PhotoModel model;
+	private PhotoModel 		model;
+	//Defaullt image to show when the image isn't loaded
+	public 	static Image     defaultImage;
+	private static String	 defaultImageSrc="ar.jpg"; 
+	
+	private Point  annotationPosition=null;
 	
 	public BasicPhotoComponent()
 	{
 		setModel(new PhotoModel());
 		updateUI();
-		model.setImage("ar.jpg");
+		model.setImage(defaultImageSrc);
+		setFocusable(true);
+	}
+	
+	public BasicPhotoComponent(Image image)
+	{
+		setModel(new PhotoModel());
+		updateUI();
+		setFocusable(true);
+		if ( image != null)
+		{
+			model.setImage(image);
+		}
+		else
+		{
+			model.setImage(defaultImageSrc);
+		}
+	}
+	
+	public BasicPhotoComponent(String imageSrc)
+	{
+		setModel(new PhotoModel());
+		updateUI();
+		setFocusable(true);
+		if ( imageSrc != null)
+		{
+			model.setImage(imageSrc);
+		}
+		else
+		{
+			model.setImage(defaultImageSrc);
+		}
 	}
 	
 	public void setUI(PhotoUI ui)
@@ -46,6 +82,11 @@ public class BasicPhotoComponent extends JComponent implements ChangeListener
 		{
 			m.removeChangeListener(this);
 		}
+	}
+	
+	public Annotation getAnnotation()
+	{
+		return model.getAnnotation();
 	}
 	
 	public PhotoModel getModel()
@@ -80,9 +121,33 @@ public class BasicPhotoComponent extends JComponent implements ChangeListener
 		repaint();
 	}
 	
+	public void setImage(Image image)
+	{
+		model.setImage(image);
+	}
+	
 	public void onDoubleClick()
 	{
 		flip();
+	}
+	
+	public void onKeyType(char character)
+	{
+		if ( model.isFlipped() )
+		{
+			System.out.println("You typed: "+character);
+			Annotation annotation = model.getAnnotation();
+			if ( annotation == null )
+			{
+				annotation = new Annotation();
+			}
+			String oldStr = annotation.getText();
+			oldStr += character;
+			System.out.println("Key type -> Annotation position = "+annotationPosition);
+			annotation.setLocation(annotationPosition);
+			annotation.setText(oldStr);
+			model.setAnnotation(annotation);
+		}
 	}
 	
 	public void onMouseEnter()
@@ -96,13 +161,18 @@ public class BasicPhotoComponent extends JComponent implements ChangeListener
 	public void onMouseExit()
 	{
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		System.out.println("Mouse exit -> Annotation position "+annotationPosition);
 	}
 	
 	public void onSimpleClick(Point location)
 	{
 		if ( model.isFlipped() )
 		{
-			model.addStroke(location);
+			if ( annotationPosition == null)
+			{
+				annotationPosition = location;
+				System.out.println("Simple click -> Annotation position = "+annotationPosition);
+			}
 		}
 	}
 	
