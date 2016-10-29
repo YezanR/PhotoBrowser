@@ -11,6 +11,7 @@ import java.awt.event.ItemListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,7 +24,9 @@ import javax.swing.JToggleButton;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import yezan.customSwing.*;
+import yezan.customSwing.controller.BasicPhotoComponent;
+import yezan.customSwing.view.PhotoUI;;
+
 
 public class PhotoBrowser 
 {
@@ -55,6 +58,8 @@ public class PhotoBrowser
     private final Dimension mainWindowMinSize = new Dimension(400, 250);
     private final Dimension toolbarSize = new Dimension(150, 450);
 
+	BasicPhotoComponent selectedPhoto;
+    
 	// Model 
 	public final static String windowTitle = "Photo Browser";
 	public final static String fileString = "File";
@@ -129,6 +134,9 @@ public class PhotoBrowser
 		toolbar.add(familyToggleBtn);
 		toolbar.add(vacationToggleBtn);
 		toolbar.add(schoolToggleBtn);
+		
+		JButton textTool = new JButton("Text");
+		toolbar.add(textTool);
 		
 		toolbar.setPreferredSize(toolbarSize);
 		toolbar.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(189, 195, 199)));
@@ -268,7 +276,6 @@ public class PhotoBrowser
 	public static void main(String[] args)
 	{
 		UIManager.put(PhotoUI.UI_CLASS_ID, "yezan.customSwing.BasicPhotoUI");
-		
 		PhotoBrowser pb = new PhotoBrowser();
 	}
 }
